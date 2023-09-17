@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import yourssu.blog.domain.article.repository.ArticleRepository
 import yourssu.blog.domain.comment.dto.request.CommentCreateRequestDto
+import yourssu.blog.domain.comment.dto.request.CommentDeleteRequestDto
 import yourssu.blog.domain.comment.dto.request.CommentUpdateRequestDto
 import yourssu.blog.domain.comment.dto.response.CommentCreateResponseDto
 import yourssu.blog.domain.comment.dto.response.CommentUpdateResponseDto
@@ -60,5 +61,23 @@ class CommentService(
         }
 
         return CommentUpdateResponseDto(findComment.id, existUser.email, findComment.content)
+    }
+
+    @Transactional
+    fun delete(articleId: Long, commentId: Long, request: CommentDeleteRequestDto) {
+        // 존재하는 사용자, 글, 댓글, 일치하는 사용자, 일치하는 글이여야 삭제 가능.
+        val existUser = userRepository.findByEmail(request.email!!) ?: throw BusinessException(ErrorCode.USER_NOT_FOUND)
+
+        existUser.takeIf { passwordEncoder.matches(request.password, it.password) } ?: throw BusinessException(ErrorCode.WRONG_PASSWORD)
+
+        val existArticle = articleRepository.findByIdOrNull(articleId) ?: throw BusinessException(ErrorCode.ARTICLE_NOT_FOUND)
+
+        val findComment = commentRepository.findByIdOrNull(commentId) ?: throw BusinessException(ErrorCode.COMMENT_NOT_FOUND)
+
+        when {
+            findComment.user.email != request.email -> throw BusinessException(ErrorCode.USER_NOT_MATCH)
+            findComment.article.id != existArticle.id -> throw BusinessException(ErrorCode.ARTICLE_NOT_MATCH)
+            else -> commentRepository.deleteById(findComment.id!!)
+        }
     }
 }
