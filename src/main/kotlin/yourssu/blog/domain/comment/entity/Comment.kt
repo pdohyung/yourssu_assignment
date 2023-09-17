@@ -16,6 +16,7 @@ class Comment (
         @Column(name = "comment_id")
         val id : Long? = null,
 
+        @Column(nullable = false)
         val content : String,
 
         @ManyToOne(fetch = FetchType.LAZY)

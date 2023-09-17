@@ -19,12 +19,13 @@ import yourssu.blog.error.exception.custom.BusinessException
 
 class ArticleServiceTest : BehaviorSpec() {
 
+    private val articleRepository = mockk<ArticleRepository>()
+
+    private val userRepository = mockk<UserRepository>()
+
+    private val passwordEncoder = mockk<BCryptPasswordEncoder>()
+
     init {
-        val articleRepository = mockk<ArticleRepository>()
-
-        val userRepository = mockk<UserRepository>()
-
-        val passwordEncoder = mockk<BCryptPasswordEncoder>()
 
         afterContainer {
             clearAllMocks()
