@@ -17,7 +17,7 @@ class Comment (
         val id : Long? = null,
 
         @Column(nullable = false)
-        val content : String,
+        var content : String,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "article_id")
@@ -29,4 +29,8 @@ class Comment (
         @OnDelete(action = OnDeleteAction.CASCADE)
         val user: User
 
-) : BaseTimeEntity()
+) : BaseTimeEntity(){
+        fun update(content: String){
+                this.content = content
+        }
+}
