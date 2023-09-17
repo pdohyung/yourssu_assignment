@@ -3,6 +3,7 @@ package yourssu.blog.domain.user.service
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import yourssu.blog.domain.user.dto.request.UserDeleteRequestDto
 import yourssu.blog.domain.user.dto.request.UserJoinRequestDto
 import yourssu.blog.domain.user.dto.response.UserJoinResponseDto
 import yourssu.blog.domain.user.entity.User
@@ -32,5 +33,14 @@ class UserService(
         val savedUser = userRepository.save(user)
 
         return UserJoinResponseDto(savedUser.email, savedUser.username)
+    }
+
+    @Transactional
+    fun delete(request: UserDeleteRequestDto) {
+        val existUser = userRepository.findByEmail(request.email!!) ?: throw BusinessException(ErrorCode.USER_NOT_FOUND)
+
+        existUser.takeIf { passwordEncoder.matches(request.password, it.password) } ?: throw BusinessException(ErrorCode.WRONG_PASSWORD)
+
+        userRepository.deleteById(existUser.id!!)
     }
 }
