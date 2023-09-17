@@ -5,6 +5,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import yourssu.blog.domain.article.dto.request.ArticleCreateRequestDto
+import yourssu.blog.domain.article.dto.request.ArticleDeleteRequestDto
 import yourssu.blog.domain.article.dto.request.ArticleUpdateRequestDto
 import yourssu.blog.domain.article.dto.response.ArticleCreateResponseDto
 import yourssu.blog.domain.article.dto.response.ArticleUpdateResponseDto
@@ -59,5 +60,23 @@ class ArticleService(
         }
 
         return ArticleUpdateResponseDto(findArticle.id, existUser.email, findArticle.title, findArticle.content)
+    }
+
+    @Transactional
+    fun delete(articleId: Long, request: ArticleDeleteRequestDto) {
+
+        val existUser = userRepository.findByEmail(request.email!!) ?: throw BusinessException(ErrorCode.USER_NOT_FOUND)
+
+        if(!passwordEncoder.matches(request.password, existUser.password)){
+            throw BusinessException(ErrorCode.WRONG_PASSWORD)
+        }
+
+        val findArticle = articleRepository.findByIdOrNull(articleId) ?: throw BusinessException(ErrorCode.ARTICLE_NOT_FOUND)
+
+        if(findArticle.user.email != request.email){
+            throw BusinessException(ErrorCode.USER_NOT_MATCH)
+        } else{
+            articleRepository.deleteById(findArticle.id!!)
+        }
     }
 }
