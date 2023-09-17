@@ -47,9 +47,7 @@ class ArticleService(
 
         val existUser = userRepository.findByEmail(request.email!!) ?: throw BusinessException(ErrorCode.USER_NOT_FOUND)
 
-        if(!passwordEncoder.matches(request.password, existUser.password)){
-            throw BusinessException(ErrorCode.WRONG_PASSWORD)
-        }
+        existUser.takeIf { passwordEncoder.matches(request.password, it.password) } ?: throw BusinessException(ErrorCode.WRONG_PASSWORD)
 
         val findArticle = articleRepository.findByIdOrNull(articleId) ?: throw BusinessException(ErrorCode.ARTICLE_NOT_FOUND)
 
@@ -67,9 +65,7 @@ class ArticleService(
 
         val existUser = userRepository.findByEmail(request.email!!) ?: throw BusinessException(ErrorCode.USER_NOT_FOUND)
 
-        if(!passwordEncoder.matches(request.password, existUser.password)){
-            throw BusinessException(ErrorCode.WRONG_PASSWORD)
-        }
+        existUser.takeIf { passwordEncoder.matches(request.password, it.password) } ?: throw BusinessException(ErrorCode.WRONG_PASSWORD)
 
         val findArticle = articleRepository.findByIdOrNull(articleId) ?: throw BusinessException(ErrorCode.ARTICLE_NOT_FOUND)
 
