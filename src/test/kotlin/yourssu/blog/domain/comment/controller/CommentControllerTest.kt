@@ -12,7 +12,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import yourssu.blog.domain.comment.dto.request.CommentCreateRequestDto
+import yourssu.blog.domain.comment.dto.request.CommentUpdateRequestDto
 import yourssu.blog.domain.comment.dto.response.CommentCreateResponseDto
+import yourssu.blog.domain.comment.dto.response.CommentUpdateResponseDto
 import yourssu.blog.domain.comment.service.CommentService
 
 class CommentControllerTest : DescribeSpec() {
@@ -42,6 +44,27 @@ class CommentControllerTest : DescribeSpec() {
                 )
 
                 result.andExpect(MockMvcResultMatchers.status().isCreated)
+                        .andExpect(MockMvcResultMatchers.jsonPath("$.commentId").value(1L))
+                        .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("test@test.com"))
+                        .andExpect(MockMvcResultMatchers.jsonPath("$.content").value("test"))
+                        .andDo(MockMvcResultHandlers.print())
+            }
+        }
+
+        describe("댓글 수정 요청"){
+            it("CommentUpdateResponseDto와 200 status를 반환한다."){
+
+                val request = CommentUpdateRequestDto(email = "test@test.com", password = "test-pw", content = "test")
+                val response = CommentUpdateResponseDto(commentId = 1L, email = "test@test.com", content = "test")
+
+                every { commentService.update(any(), any(), any()) } returns response
+
+                val result = mockMvc.perform(MockMvcRequestBuilders.patch("/api/comments/1/1",)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                )
+
+                result.andExpect(MockMvcResultMatchers.status().isOk)
                         .andExpect(MockMvcResultMatchers.jsonPath("$.commentId").value(1L))
                         .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("test@test.com"))
                         .andExpect(MockMvcResultMatchers.jsonPath("$.content").value("test"))
