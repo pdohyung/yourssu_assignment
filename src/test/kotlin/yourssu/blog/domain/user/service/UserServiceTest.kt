@@ -7,6 +7,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import yourssu.blog.domain.user.dto.request.UserJoinRequestDto
 import yourssu.blog.domain.user.entity.User
 import yourssu.blog.domain.user.repository.UserRepository
 import yourssu.blog.error.ErrorCode
@@ -22,18 +23,19 @@ class UserServiceTest : BehaviorSpec(){
         }
 
         Given("사용자가 회원가입"){
+            val request = UserJoinRequestDto(email = "test@test.com", "test-pw", "test")
             val user = User(
-                    email = "test@test.com",
-                    password = "test-pw",
-                    username = "test"
+                    email = request.email!!,
+                    password = request.password!!,
+                    username = request.username!!
             )
 
             When("중복된 이메일로 회원가입 요청"){
                 every { userRepository.findByEmail(any()) } returns mockk()
                 val result = shouldThrow<BusinessException> {
-                    val user = userRepository.findByEmail( email = "test@test.com")
+                    val findUser = userRepository.findByEmail( email = request.email!!)
 
-                    if(user != null) throw BusinessException(ErrorCode.DUPLICATE_EMAIL)
+                    if(findUser != null) throw BusinessException(ErrorCode.DUPLICATE_EMAIL)
                 }
                 Then("이메일 중복 예외처리") {
                     result.errorCode.message shouldBe "중복된 이메일입니다."
@@ -44,8 +46,7 @@ class UserServiceTest : BehaviorSpec(){
                 every { userRepository.findByEmail(any()) } returns null
                 every { userRepository.save(any()) } returns user
 
-                val findUser = userRepository.findByEmail( email = "test@test.com")
-                if(findUser == null) userRepository.save(user)
+                userRepository.findByEmail( email = request.email!!) ?: userRepository.save(user)
 
                 Then("회원가입 성공"){
                     verify(exactly = 1) { userRepository.save(user) }

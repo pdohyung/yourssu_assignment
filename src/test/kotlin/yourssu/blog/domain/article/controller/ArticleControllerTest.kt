@@ -18,9 +18,9 @@ import yourssu.blog.domain.article.service.ArticleService
 class ArticleControllerTest : DescribeSpec() {
 
     @MockK
-    lateinit var articleService: ArticleService
+    private lateinit var articleService: ArticleService
 
-    private var mockMvc: MockMvc
+    private lateinit var mockMvc: MockMvc
 
     private val objectMapper = ObjectMapper()
 

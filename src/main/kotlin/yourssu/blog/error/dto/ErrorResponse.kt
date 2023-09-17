@@ -1,3 +1,5 @@
 package yourssu.blog.error.dto
 
-data class ErrorResponse(val code: Int, val message: String)
+import java.time.LocalDateTime
+
+data class ErrorResponse(val time: LocalDateTime, val status: String, val message: String, val requestURI: String)
