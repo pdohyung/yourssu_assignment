@@ -65,7 +65,7 @@ class CommentService(
 
     @Transactional
     fun delete(articleId: Long, commentId: Long, request: CommentDeleteRequestDto) {
-        // 존재하는 사용자, 글, 댓글, 일치하는 사용자, 일치하는 글이여야 삭제 가능.
+
         val existUser = userRepository.findByEmail(request.email!!) ?: throw BusinessException(ErrorCode.USER_NOT_FOUND)
 
         existUser.takeIf { passwordEncoder.matches(request.password, it.password) } ?: throw BusinessException(ErrorCode.WRONG_PASSWORD)
