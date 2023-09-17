@@ -5,6 +5,8 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.just
+import io.mockk.runs
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -12,6 +14,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import yourssu.blog.domain.article.dto.request.ArticleCreateRequestDto
+import yourssu.blog.domain.article.dto.request.ArticleDeleteRequestDto
 import yourssu.blog.domain.article.dto.request.ArticleUpdateRequestDto
 import yourssu.blog.domain.article.dto.response.ArticleCreateResponseDto
 import yourssu.blog.domain.article.dto.response.ArticleUpdateResponseDto
@@ -70,6 +73,23 @@ class ArticleControllerTest : DescribeSpec() {
                         .andExpect(jsonPath("$.email").value("test@test.com"))
                         .andExpect(jsonPath("$.title").value("updatedTitle"))
                         .andExpect(jsonPath("$.content").value("updatedContent"))
+                        .andDo(print())
+            }
+        }
+
+        describe("글 삭제 요청") {
+            it("200 status 반환한다.") {
+
+                val request = ArticleDeleteRequestDto(email = "test@test.com", password = "test-pw")
+
+                every { articleService.delete(any(), any()) } just runs
+
+                val result = mockMvc.perform(MockMvcRequestBuilders.delete("/api/articles/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                )
+
+                result.andExpect(status().isOk)
                         .andDo(print())
             }
         }
