@@ -13,5 +13,10 @@ data class ResponseDto<T>(val data : T) {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(data)
         }
+
+        fun noContent(): ResponseEntity<Void>{
+            return ResponseEntity.status(HttpStatus.OK)
+                    .build()
+        }
     }
 }
