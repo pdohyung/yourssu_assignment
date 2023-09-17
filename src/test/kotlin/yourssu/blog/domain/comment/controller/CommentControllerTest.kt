@@ -5,13 +5,17 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.just
+import io.mockk.runs
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import yourssu.blog.domain.comment.dto.request.CommentCreateRequestDto
+import yourssu.blog.domain.comment.dto.request.CommentDeleteRequestDto
 import yourssu.blog.domain.comment.dto.request.CommentUpdateRequestDto
 import yourssu.blog.domain.comment.dto.response.CommentCreateResponseDto
 import yourssu.blog.domain.comment.dto.response.CommentUpdateResponseDto
@@ -43,11 +47,11 @@ class CommentControllerTest : DescribeSpec() {
                         .content(objectMapper.writeValueAsString(request))
                 )
 
-                result.andExpect(MockMvcResultMatchers.status().isCreated)
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.commentId").value(1L))
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("test@test.com"))
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.content").value("test"))
-                        .andDo(MockMvcResultHandlers.print())
+                result.andExpect(status().isCreated)
+                        .andExpect(jsonPath("$.commentId").value(1L))
+                        .andExpect(jsonPath("$.email").value("test@test.com"))
+                        .andExpect(jsonPath("$.content").value("test"))
+                        .andDo(print())
             }
         }
 
@@ -64,11 +68,28 @@ class CommentControllerTest : DescribeSpec() {
                         .content(objectMapper.writeValueAsString(request))
                 )
 
-                result.andExpect(MockMvcResultMatchers.status().isOk)
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.commentId").value(1L))
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("test@test.com"))
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.content").value("test"))
-                        .andDo(MockMvcResultHandlers.print())
+                result.andExpect(status().isOk)
+                        .andExpect(jsonPath("$.commentId").value(1L))
+                        .andExpect(jsonPath("$.email").value("test@test.com"))
+                        .andExpect(jsonPath("$.content").value("test"))
+                        .andDo(print())
+            }
+        }
+
+        describe("댓글 삭제 요청"){
+            it("200 status를 반환한다."){
+
+                val request = CommentDeleteRequestDto(email = "test@test.com", password = "test-pw")
+
+                every { commentService.delete(any(), any(), any()) } just runs
+
+                val result = mockMvc.perform(MockMvcRequestBuilders.delete("/api/comments/1/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                )
+
+                result.andExpect(status().isOk)
+                        .andDo(print())
             }
         }
     }
