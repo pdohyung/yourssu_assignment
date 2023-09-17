@@ -15,13 +15,20 @@ class Article (
         @Column(name = "article_id", nullable = false)
         val id : Long? = null,
 
-        val content : String,
+        @Column(nullable = false)
+        var content : String,
 
-        val title : String,
+        @Column(nullable = false)
+        var title : String,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "user_id", nullable = false)
         @OnDelete(action = OnDeleteAction.CASCADE)
         val user : User
 
-) : BaseTimeEntity()
+) : BaseTimeEntity() {
+        fun update(title: String, content: String){
+                this.title = title
+                this.content = content
+        }
+}
