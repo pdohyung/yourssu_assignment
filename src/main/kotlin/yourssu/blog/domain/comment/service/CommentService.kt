@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import yourssu.blog.domain.article.repository.ArticleRepository
 import yourssu.blog.domain.comment.dto.request.CommentCreateRequestDto
+import yourssu.blog.domain.comment.dto.request.CommentUpdateRequestDto
 import yourssu.blog.domain.comment.dto.response.CommentCreateResponseDto
+import yourssu.blog.domain.comment.dto.response.CommentUpdateResponseDto
 import yourssu.blog.domain.comment.entity.Comment
 import yourssu.blog.domain.comment.repository.CommentRepository
 import yourssu.blog.domain.user.repository.UserRepository
@@ -38,5 +40,25 @@ class CommentService(
         ).let { commentRepository.save(it) }
 
         return CommentCreateResponseDto(savedComment.id, existUser.email, savedComment.content)
+    }
+
+    @Transactional
+    fun update(articleId: Long, commentId: Long, request: CommentUpdateRequestDto): CommentUpdateResponseDto {
+
+        val existUser = userRepository.findByEmail(request.email!!) ?: throw BusinessException(ErrorCode.USER_NOT_FOUND)
+
+        existUser.takeIf { passwordEncoder.matches(request.password, it.password) } ?: throw BusinessException(ErrorCode.WRONG_PASSWORD)
+
+        val existArticle = articleRepository.findByIdOrNull(articleId) ?: throw BusinessException(ErrorCode.ARTICLE_NOT_FOUND)
+
+        val findComment = commentRepository.findByIdOrNull(commentId) ?: throw BusinessException(ErrorCode.COMMENT_NOT_FOUND)
+
+        when {
+            findComment.user.email != request.email -> throw BusinessException(ErrorCode.USER_NOT_MATCH)
+            findComment.article.id != existArticle.id -> throw BusinessException(ErrorCode.ARTICLE_NOT_MATCH)
+            else -> findComment.update(request.content!!)
+        }
+
+        return CommentUpdateResponseDto(findComment.id, existUser.email, findComment.content)
     }
 }
